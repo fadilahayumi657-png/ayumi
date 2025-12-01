@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Love</title>
+
+<style>
+    body {
+        margin: 0;
+        overflow: hidden;
+        background: radial-gradient(#003b7a, #001a3a);
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    canvas {
+        position: absolute;
+        top: 0; 
+        left: 0;
+        z-index: 1;
+    }
+
+    #starsCanvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 0;
+    }
+
+    .text-target {
+        position: absolute;
+        top: 80px;
+        font-size: 45px;
+        font-family: Arial, sans-serif;
+        color: #ff8bcf;
+        text-shadow: 0 0 15px #ff5ad8;
+        opacity: 0;
+        transition: 2s ease-in-out;
+        z-index: 10;
+    }
+
+#loveWrapper {
+    position: absolute;
+    top: 80px;
+    width: 100%;
+    text-align: center;
+    z-index: 10;
+    opacity: 0;            
+    transition: 2s ease-in; 
+}
+
+#loveText {
+    font-size: 30px;
+    font-family: Arial, sans-serif;
+    color: #ff8bcf;
+    text-shadow: 0 0 15px #ff5ad8;
+    margin-bottom: 10px;
+}
+
+#loveName {
+    font-size: 28px;
+    font-family: Arial, sans-serif;
+    color: #ffd0f0;
+    text-shadow: 0 0 12px #ff99d9;
+}
+
+    .cat {
+        position: absolute;
+        bottom: 30px;
+        width: 140px;
+        z-index: 5;
+    }
+
+    #catLeft {
+        left: 60px;
+        transform: scaleX(-1);
+    }
+
+    #catRight {
+        right: 60px;
+    }
+</style>
+</head>
+
+<body>
+<!-- glowing text -->
+<div id="loveWrapper">
+    <div id="loveText">You are my favorite part of today, tomorrow, n forever</div>
+    <div id="loveName"><b>DIKA</b> ❤</div>
+</div>
+
+<!-- stars -->
+<canvas id="starsCanvas"></canvas>
+
+<!-- love canvas -->
+<canvas id="canvas"></canvas>
+
+<!-- cats -->
+<img src="c:\Users\lenovo\Downloads\ft4-removebg-preview.png" id="catLeft" class="cat">
+<img src="c:\Users\lenovo\Downloads\ft3-removebg-preview.png" id="catRight" class="cat">
+
+
+<script>
+/* ===========================
+   STAR BACKGROUND
+=========================== */
+const starCanvas = document.getElementById("starsCanvas");
+const starCtx = starCanvas.getContext("2d");
+
+starCanvas.width = innerWidth;
+starCanvas.height = innerHeight;
+
+const stars = [];
+
+class Star {
+    constructor() {
+        this.x = Math.random() * starCanvas.width;
+        this.y = Math.random() * starCanvas.height;
+        this.size = Math.random() * 2 + 0.3;
+        this.speed = Math.random() * 0.3 + 0.05;
+    }
+
+    draw() {
+        starCtx.fillStyle = "#ffffffc5";
+        starCtx.beginPath();
+        starCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        starCtx.fill();
+    }
+
+    update() {
+        this.y += this.speed;
+        if (this.y > starCanvas.height) {
+            this.y = -5;
+            this.x = Math.random() * starCanvas.width;
+        }
+        this.draw();
+    }
+}
+
+function initStars() {
+    for (let i = 0; i < 150; i++) stars.push(new Star());
+}
+function animateStars() {
+    starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
+    stars.forEach(s => s.update());
+    requestAnimationFrame(animateStars);
+}
+
+initStars();
+animateStars();
+
+
+/* ===========================
+   LOVE PARTICLES
+=========================== */
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let stopLove = false;  // <<<<<<  TAMBAHAN UNTUK STOP SETELAH 20 DETIK
+
+const particles = [];
+const heartShape = [];
+
+for (let t = 0; t < Math.PI * 2; t += 0.07) {
+    let x = 16 * Math.pow(Math.sin(t), 3);
+    let y =
+        13 * Math.cos(t) -
+        5 * Math.cos(2 * t) -
+        2 * Math.cos(3 * t) -
+        Math.cos(4 * t);
+
+    heartShape.push({ x: x * 10, y: -y * 10 });
+}
+
+class Particle {
+    constructor(x, y) {
+        this.x = x;
+        this.y = y;
+
+        const h = heartShape[Math.floor(Math.random() * heartShape.length)];
+        this.tx = canvas.width / 2 + h.x;
+        this.ty = canvas.height / 2 + h.y;
+
+        this.size = Math.random() * 3 + 2;
+        this.speed = Math.random() * 0.01 + 0.01;
+    }
+
+    update() {
+        this.x += (this.tx - this.x) * this.speed;
+        this.y += (this.ty - this.y) * this.speed;
+
+        ctx.fillStyle = "#ff83c7";
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function shootLove() {
+    if (stopLove) return; // <<<<<<  KODE PENTING SUPAYA LOVE STOP
+
+    const leftX = 150;
+    const leftY = canvas.height - 120;
+
+    const rightX = canvas.width - 150;
+    const rightY = canvas.height - 120;
+
+    for (let i = 0; i < 10; i++) {
+        particles.push(new Particle(leftX, leftY));
+        particles.push(new Particle(rightX, rightY));
+    }
+}
+
+setInterval(shootLove, 160);
+
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => p.update());
+    requestAnimationFrame(animate);
+}
+animate();
+
+
+/* ===========================
+   STOP LOVE AFTER 20 SECONDS
+=========================== */
+setTimeout(() => {
+    stopLove = true;  
+}, 15000); 
+
+
+/* ===========================
+    TEXT REVEAL
+=========================== */
+setTimeout(() => {
+    document.getElementById("loveWrapper").style.opacity = 1;
+}, 2000);
+
+</script>
+
+</body>
+</html>
